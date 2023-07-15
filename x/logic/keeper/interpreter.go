@@ -43,10 +43,9 @@ func (k Keeper) execute(ctx goctx.Context, program, query string, exts []sdk.Acc
 	ctx = k.enhanceContext(ctx)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-
-	manifests := make([]types.ExtensionManifest, 0)
-	manifestMsg := types.PrologQueryMsg {
-		PrologExtensionManifest: &types.PrologExtensionManifest {},
+	manifests := make([]types.PredicateManifest, 0)
+	manifestMsg := types.PrologQueryRequest{
+		PrologExtensionManifest: &types.PrologExtensionManifestRequest{},
 	}
 	manifestMsgBz, err := json.Marshal(manifestMsg)
 	if err != nil {
@@ -63,7 +62,7 @@ func (k Keeper) execute(ctx goctx.Context, program, query string, exts []sdk.Acc
 			return nil, errorsmod.Wrapf(types.Internal, "error unmarshalling manifest response: %v", err.Error())
 		}
 
-		manifests = append(manifests, *manifestRes.PrologExtensionManifest.Manifests...)
+		manifests = append(manifests, manifestRes.PrologExtensionManifest.Predicates...)
 	}
 
 	i, userOutputBuffer, err := k.newInterpreter(ctx, manifests)
@@ -136,7 +135,7 @@ func checkLimits(request *types.QueryServiceAskRequest, limits types.Limits) err
 }
 
 // newInterpreter creates a new interpreter properly configured.
-func (k Keeper) newInterpreter(ctx goctx.Context, manifests []ExtensionManifest) (*prolog.Interpreter, *util.BoundedBuffer, error) {
+func (k Keeper) newInterpreter(ctx goctx.Context, manifests []types.PredicateManifest) (*prolog.Interpreter, *util.BoundedBuffer, error) {
 	sdkctx := sdk.UnwrapSDKContext(ctx)
 	params := k.GetParams(sdkctx)
 
@@ -165,7 +164,7 @@ func (k Keeper) newInterpreter(ctx goctx.Context, manifests []ExtensionManifest)
 
 	for _, manifest := range manifests {
 		predicates[manifest.Name] = manifest.Cost
-		extendedRegistry[manifest.Name] = predicate.NewWasmExtension(manifest.ContractAddress, manifest.Name)
+		extendedRegistry[manifest.Name] = predicate.NewWasmExtension(manifest.Address, manifest.Name)
 	}
 
 	whitelistUrls := lo.Map(
