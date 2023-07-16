@@ -36,6 +36,7 @@ func (k Keeper) enhanceContext(ctx goctx.Context) goctx.Context {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	sdkCtx = sdkCtx.WithValue(types.AuthKeeperContextKey, k.authKeeper)
 	sdkCtx = sdkCtx.WithValue(types.BankKeeperContextKey, k.bankKeeper)
+	sdkCtx = sdkCtx.WithValue(types.CosmWasmKeeperContextKey, k.wasmKeeper)
 	return sdkCtx
 }
 
@@ -164,7 +165,11 @@ func (k Keeper) newInterpreter(ctx goctx.Context, manifests []types.PredicateMan
 
 	for _, manifest := range manifests {
 		predicates[manifest.Name] = manifest.Cost
-		extendedRegistry[manifest.Name] = predicate.NewWasmExtension(manifest.Address, manifest.Name)
+		contractAddress, err := sdk.AccAddressFromBech32(manifest.Address)
+		if err != nil {
+			return nil, nil, errorsmod.Wrapf(types.InvalidArgument, "error parsing contract address: %v", err.Error())
+		}
+		extendedRegistry[manifest.Name] = predicate.NewWasmExtension(contractAddress, manifest.Name)
 	}
 
 	whitelistUrls := lo.Map(

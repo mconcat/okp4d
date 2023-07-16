@@ -243,7 +243,7 @@ chain-init: build ## Initialize the blockchain with default settings.
 chain-start: build ## Start the blockchain with existing configuration (see chain-init)
 	@echo "${COLOR_CYAN} 🛠️ Starting chain ${COLOR_RESET}${CHAIN}${COLOR_CYAN} with configuration ${COLOR_YELLOW}${CHAIN_HOME}${COLOR_RESET}"; \
 	${CHAIN_BINARY} start --moniker ${CHAIN_MONIKER} \
-	  --home ${CHAIN_HOME}
+	  --home ${CHAIN_HOME} --trace
 
 chain-stop: ## Stop the blockchain
 	@echo "${COLOR_CYAN} ✋️ Stopping chain ${COLOR_RESET}${CHAIN}${COLOR_CYAN} with configuration ${COLOR_YELLOW}${CHAIN_HOME}${COLOR_RESET}"

@@ -1,7 +1,6 @@
 package types
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ichiban/prolog/engine"
 )
 
@@ -22,7 +21,7 @@ type PrologExtensionManifestResponse struct {
 }
 
 type PredicateManifest struct {
-	Address sdk.AccAddress `json:"address"`
+	Address string  `json:"address"`
 	Name    string         `json:"name"`
 	Cost    uint64         `json:"cost"`
 }
