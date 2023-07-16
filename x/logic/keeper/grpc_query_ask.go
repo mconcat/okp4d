@@ -37,13 +37,20 @@ func (k Keeper) Ask(ctx goctx.Context, req *types.QueryServiceAskRequest) (respo
 			panic(r)
 		}
 	}()
+	
 	sdkCtx.GasMeter().ConsumeGas(sdkCtx.GasMeter().GasConsumed(), types.ModuleName)
 
+	extensionAddrs := make([]sdk.AccAddress, len(req.Extensions))
+	for i, ext := range req.Extensions {
+		extensionAddrs[i] = sdk.MustAccAddressFromBech32(ext)
+	}
 	//nolint:contextcheck
 	return k.execute(
 		sdkCtx,
 		req.Program,
-		req.Query)
+		req.Query,
+		extensionAddrs,
+	)
 }
 
 // withGasMeter returns a new context with a gas meter that has the given limit.
